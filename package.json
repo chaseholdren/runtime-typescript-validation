@@ -1,0 +1,37 @@
+{
+  "name": "runtime-typescript-validation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "simpleserver": "http-server ./dist -p 8888",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaseholdren/runtime-typescript-validation.git"
+  },
+  "author": "Chase Holdren",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chaseholdren/runtime-typescript-validation/issues"
+  },
+  "homepage": "https://github.com/chaseholdren/runtime-typescript-validation#readme",
+  "dependencies": {
+    "browserfs": "^1.4.3",
+    "glob": "^7.1.4",
+    "json-stable-stringify": "1.0.1",
+    "typescript": "^3.4.5"
+  },
+  "devDependencies": {
+    "create-hash": "^1.2.0",
+    "css-loader": "^1.0.0",
+    "http-server": "^0.11.1",
+    "json-stable-stringify": "1.0.1",
+    "monaco-editor": "^0.14.3",
+    "style-loader": "^0.23.1",
+    "typescript": "^3.4.5",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
+  }
+}
