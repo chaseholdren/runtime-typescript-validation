@@ -1,13 +1,10 @@
     {
         "compilerOptions": {
             "module": "commonjs",
-            "experimentalDecorators": true,
             "allowSyntheticDefaultImports": true,
             "strict": true,
-            "lib": ["es6", "dom"],
-            "target": "es5",
-            "composite": true,
-            "noEmitOnError": true,
+            "lib": ["es6", "dom", "es2016", "esnext"],
+            "target": "es6",
             "outDir": "types",
             "declaration": true,
             "declarationMap": true,
@@ -21,6 +18,8 @@
             "noImplicitAny": true,
             "suppressImplicitAnyIndexErrors": true,
             "noUnusedLocals": true,
-            "downlevelIteration": true
+            "downlevelIteration": true,
+            "esModuleInterop": true,
+            "importHelpers": true
         }
     }

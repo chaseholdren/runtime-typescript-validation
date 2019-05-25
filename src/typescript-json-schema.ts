@@ -1,20 +1,11 @@
-// import * as glob from "glob";
-// import * as stringify from "json-stable-stringify";
-// import * as path from "path";
-// import createHash from "create-hash";
-// import * as ts from "typescript";
-// export { Program, CompilerOptions, Symbol } from "typescript";
-import ts from "typescript";
-
-const glob = require('glob');
+import "./typescriptServices";
+import * as ts from "./typescript";
 const stringify = require('json-stable-stringify');
 const path = require('path');
 const createHash = require('create-hash');
-// const ts = require('typescript');
 const vm = require("vm");
 
 const REGEX_FILE_NAME_OR_SPACE = /(\bimport\(".*?"\)|".*?")\.| /g;
-const REGEX_TSCONFIG_NAME = /^.*\.json$/;
 const REGEX_TJS_JSDOC = /^-([\w]+)\s+(\S|\S[\s\S]*\S)\s*$/g;
 const NUMERIC_INDEX_PATTERN = "^[0-9]+$";
 
@@ -361,7 +352,7 @@ export class JsonSchemaGenerator {
         const comments = symbol.getDocumentationComment(this.tc);
 
         if (comments.length) {
-            definition.description = comments.map(comment => comment.kind === "lineBreak" ? comment.text : comment.text.trim().replace(/\r\n/g, "\n")).join("");
+            definition.description = comments.map((comment: { kind: string; text: { trim: () => { replace: (arg0: RegExp, arg1: string) => void; }; }; }) => comment.kind === "lineBreak" ? comment.text : comment.text.trim().replace(/\r\n/g, "\n")).join("");
         }
 
         // jsdocs are separate from comments
@@ -383,7 +374,7 @@ export class JsonSchemaGenerator {
 
         if (tupleType) { // tuple
             const elemTypes: ts.NodeArray<ts.TypeNode> = tupleType.elementTypes || (propertyType as any).typeArguments;
-            const fixedTypes = elemTypes.map(elType => this.getTypeDefinition(elType as any));
+            const fixedTypes = elemTypes.map((elType: any) => this.getTypeDefinition(elType as any));
             definition.type = "array";
             definition.items = fixedTypes;
             const targetTupleType = (propertyType as ts.TupleTypeReference).target;
@@ -715,15 +706,15 @@ export class JsonSchemaGenerator {
         }
 
         const clazz = <ts.ClassDeclaration>node;
-        const props = this.tc.getPropertiesOfType(clazzType).filter(prop => {
+        const props = this.tc.getPropertiesOfType(clazzType).filter((prop: { declarations: any; }) => {
             if (!this.args.excludePrivate) {
                 return true;
             }
 
             const decls = prop.declarations;
-            return !(decls && decls.filter(decl => {
+            return !(decls && decls.filter((decl: { modifiers: any; }) => {
                 const mods = decl.modifiers;
-                return mods && mods.filter(mod => mod.kind === ts.SyntaxKind.PrivateKeyword).length > 0;
+                return mods && mods.filter((mod: { kind: any; }) => mod.kind === ts.SyntaxKind.PrivateKeyword).length > 0;
             }).length > 0);
         });
         const fullName = this.tc.typeToString(clazzType, undefined, ts.TypeFormatFlags.UseFullyQualifiedType);
@@ -738,7 +729,7 @@ export class JsonSchemaGenerator {
             definition.oneOf = oneOf;
         } else {
             if (clazz.members) {
-                const indexSignatures = clazz.members == null ? [] : clazz.members.filter(x => x.kind === ts.SyntaxKind.IndexSignature);
+                const indexSignatures = clazz.members == null ? [] : clazz.members.filter((x: { kind: any; }) => x.kind === ts.SyntaxKind.IndexSignature);
                 if (indexSignatures.length === 1) {
                     // for case "array-types"
                     const indexSignature = indexSignatures[0] as ts.IndexSignatureDeclaration;
@@ -769,7 +760,7 @@ export class JsonSchemaGenerator {
                 const propertyName = prop.getName();
                 const propDef = this.getDefinitionForProperty(prop, node);
                 if (propDef != null) {
-                    all[propertyName] = propDef;
+                    if(propertyName) all[propertyName] = propDef;
                 }
                 return all;
             }, {});
@@ -869,7 +860,7 @@ export class JsonSchemaGenerator {
         let isStringEnum = false;
         if (typ.flags & ts.TypeFlags.Union) {
             const unionType = <ts.UnionType>typ;
-            isStringEnum = (unionType.types.every(propType => {
+            isStringEnum = (unionType.types.every((propType: { getFlags: () => number; }) => {
                 return (propType.getFlags() & ts.TypeFlags.StringLiteral) !== 0;
             }));
         }
@@ -1057,20 +1048,6 @@ export class JsonSchemaGenerator {
     }
 }
 
-export function getProgramFromFiles(files: string[], jsonCompilerOptions: any = {}, basePath: string = "./"): ts.Program {
-    // use built-in default options
-    const compilerOptions = ts.convertCompilerOptionsFromJson(jsonCompilerOptions, basePath).options;
-    const options: ts.CompilerOptions = {
-        noEmit: true, emitDecoratorMetadata: true, experimentalDecorators: true, target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS, allowUnusedLabels: true,
-    };
-    for (const k in compilerOptions) {
-        if (compilerOptions.hasOwnProperty(k)) {
-            options[k] = compilerOptions[k];
-        }
-    }
-    return ts.createProgram(files, options);
-}
-
 function generateHashOfNode(node: ts.Node, relativePath: string) {
     return createHash("md5").update(relativePath).update(node.pos.toString()).digest("hex").substring(0, 8);
 }
@@ -1093,9 +1070,9 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
 
     let diagnostics: ReadonlyArray<ts.Diagnostic> = [];
 
-    if (!args.ignoreErrors) {
-        diagnostics = ts.getPreEmitDiagnostics(program);
-    }
+    // if (!args.ignoreErrors) {
+    //     diagnostics = ts.getPreEmitDiagnostics(program);
+    // }
 
     if (diagnostics.length === 0) {
         const typeChecker = program.getTypeChecker();
@@ -1106,7 +1083,7 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
         const inheritingTypes: { [baseName: string]: string[] } = {};
         const workingDir = program.getCurrentDirectory();
 
-        program.getSourceFiles().forEach((sourceFile, _sourceFileIdx) => {
+        program.getSourceFiles().forEach((sourceFile: ts.SourceFile, _sourceFileIdx: any) => {
             const relativePath = path.relative(workingDir, sourceFile.fileName);
 
             function inspect(node: ts.Node, tc: ts.TypeChecker) {
@@ -1133,7 +1110,7 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
 
                     const baseTypes = nodeType.getBaseTypes() || [];
 
-                    baseTypes.forEach(baseType => {
+                    baseTypes.forEach((baseType: any) => {
                         var baseName = tc.typeToString(baseType, undefined, ts.TypeFormatFlags.UseFullyQualifiedType);
                         if (!inheritingTypes[baseName]) {
                             inheritingTypes[baseName] = [];
@@ -1141,7 +1118,7 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
                         inheritingTypes[baseName].push(name);
                     });
                 } else {
-                    ts.forEachChild(node, n => inspect(n, tc));
+                    ts.forEachChild(node, (n: any) => inspect(n, tc));
                 }
             }
             inspect(sourceFile, typeChecker);
@@ -1162,7 +1139,7 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
     }
 }
 
-export function generateSchema(program: ts.Program, fullTypeName: string, args: PartialArgs = {}, onlyIncludeFiles?: string[]): Definition | null {
+function generateSchema(program: ts.Program, fullTypeName: string, args: PartialArgs = {}, onlyIncludeFiles?: string[]): Definition | null {
     const generator = buildGenerator(program, args, onlyIncludeFiles);
 
     if (generator === null) {
@@ -1176,55 +1153,9 @@ export function generateSchema(program: ts.Program, fullTypeName: string, args: 
     }
 }
 
-export function programFromConfig(configFileName: string, onlyIncludeFiles?: string[]): ts.Program {
-    // basically a copy of https://github.com/Microsoft/TypeScript/blob/3663d400270ccae8b69cbeeded8ffdc8fa12d7ad/src/compiler/tsc.ts -> parseConfigFile
-    const result = ts.parseConfigFileTextToJson(configFileName, ts.sys.readFile(configFileName)!);
-    const configObject = result.config;
-
-    const configParseResult = ts.parseJsonConfigFileContent(configObject, ts.sys, path.dirname(configFileName), {}, path.basename(configFileName));
-    const options = configParseResult.options;
-    options.noEmit = true;
-    delete options.out;
-    delete options.outDir;
-    delete options.outFile;
-    delete options.declaration;
-    delete options.declarationDir;
-    delete options.declarationMap;
-
-    const program = ts.createProgram({
-        rootNames: onlyIncludeFiles || configParseResult.fileNames,
-        options,
-        projectReferences: configParseResult.projectReferences
-    });
-    return program;
-}
-
-function normalizeFileName(fn: string): string {
-    while (fn.substr(0, 2) === "./") {
-        fn = fn.substr(2);
-    }
-    return fn;
-}
-
-export function exec(filePattern: string, fullTypeName: string, args = getDefaultArgs()) {
-    let program: ts.Program;
-    let onlyIncludeFiles: string[] | undefined = undefined;
-    if (REGEX_TSCONFIG_NAME.test(path.basename(filePattern))) {
-        if (args.include && args.include.length > 0) {
-            const globs: string[][] = args.include.map(f => glob.sync(f));
-            onlyIncludeFiles = ([] as string[]).concat(...globs).map(normalizeFileName);
-        }
-        program = programFromConfig(filePattern, onlyIncludeFiles);
-    } else {
-        onlyIncludeFiles = glob.sync(filePattern);
-        if(typeof onlyIncludeFiles === 'undefined') onlyIncludeFiles = [];
-        program = getProgramFromFiles(onlyIncludeFiles, {
-            strictNullChecks: args.strictNullChecks
-        });
-        onlyIncludeFiles = onlyIncludeFiles.map(normalizeFileName);
-    }
-
-    const definition = generateSchema(program, fullTypeName, args, onlyIncludeFiles);
+export function execFromProgram(program: ts.Program) {
+    const args = getDefaultArgs();
+    const definition = generateSchema(program, "SingleGame", args, undefined);
     if (definition === null) {
         throw new Error("No output definition. Probably caused by errors prior to this?");
     }

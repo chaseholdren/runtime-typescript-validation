@@ -1,125 +1,59 @@
-import * as monaco from 'monaco-editor';
-const typescriptJsonSchema = require('./typescript-json-schema');
-const ts = require('typescript');
-// import ts from "typescript";
+import { execFromProgram } from './typescript-json-schema';
+import "./typescriptServices";
+import { defaultTypescriptText } from "./monaco-init";
+import "./monaco-init";
+import * as ts from "./typescript";
+import * as BrowserFS from 'browserfs';
 
-// const monaco = require('monaco-editor').default;
-
-// @ts-ignore
-window.MonacoEnvironment = {
-    getWorkerUrl: function (moduleId: any, label: string): any {
-        if (label === 'json') {
-            return './json.worker.bundle.js';
-        }
-        if (label === 'css') {
-            return './css.worker.bundle.js';
-        }
-        if (label === 'html') {
-            return './html.worker.bundle.js';
-        }
-        if (label === 'typescript' || label === 'javascript') {
-            return './ts.worker.bundle.js';
-        }
-        return './editor.worker.bundle.js';
+var fileSystemConfig = {
+    fs: "InMemory",
+    options: {
+        // options for the file system
     }
-}
-
-// default string region
-if (true) {
-    var defaultString = String.raw`
-        enum MeleeStageName {
-            fountainOfDreams = 'Fountain of Dreams',
-                pokemonStadium = 'Pokémon Stadium',
-                princessPeachsCastle = 'Princess Peach\'s Castle',
-                kongoJungle = 'Kongo Jungle',
-                brinstar = 'Brinstar',
-                corneria = 'Corneria',
-                yoshisStory = 'Yoshi\'s Story ',
-                onett = 'Onett',
-                muteCity = 'Mute City',
-                rainbowCruise = 'Rainbow Cruise',
-                jungleJapes = 'Jungle Japes',
-                greatBay = 'Great Bay',
-                hyruleTemple = 'Hyrule Temple',
-                brinstarDepths = 'Brinstar Depths',
-                yoshisIsland = 'Yoshi\'s Island',
-                greenGreens = 'Green Greens',
-                fourside = 'Fourside',
-                mushroomKingdomOne = 'Mushroom Kingdom I',
-                mushroomKingdomTwo = 'Mushroom Kingdom II',
-                venom = 'Venom',
-                pokeFloats = 'Poké Floats',
-                bigBlue = 'Big Blue',
-                icicleMountain = 'Icicle Mountain',
-                icetop = 'Icetop',
-                flatZone = 'Flat Zone',
-                dreamLandN64 = 'Dream Land N64',
-                yoshisIslandN64 = 'Yoshi\'s Island N64',
-                kongoJungleN64 = 'Kongo Jungle N64',
-                battlefield = 'Battlefield',
-                finalDestination = 'Final Destination',
-        }
-
-        export enum MeleeCharacterName {
-            bowser = 'Bowser',
-                donkeyKong = 'Donkey Kong',
-                doc = 'Dr. Mario',
-                falco = 'Falco',
-                falcon = 'Falcon',
-                fox = 'Fox',
-                gameAndWatch = 'Game & Watch',
-                ganondorf = 'Ganondorf',
-                iceClimbers = 'Ice Climbers',
-                kirby = 'Kirby',
-                link = 'Link',
-                luigi = 'Luigi',
-                mario = 'Mario',
-                marth = 'Marth',
-                mewtwo = 'Mewtwo',
-                ness = 'Ness',
-                peach = 'Peach',
-                pichu = 'Pichu',
-                pikachu = 'Pikachu',
-                jigglypuff = 'Jigglypuff',
-                roy = 'Roy',
-                samus = 'Samus',
-                sheik = 'Sheik',
-                yoshi = 'Yoshi',
-                youngLink = 'Young Link',
-                zelda = 'Zelda',
-        }
-
-        interface SingleGame {
-            length ? : number;
-            stage ? : MeleeStageName;
-            asCharacter: MeleeCharacterName | '' | undefined;
-            againstPlayer: string;
-            againstCharacter: MeleeCharacterName | '' | undefined;
-            didWin: boolean;
-        }
-        `;
-}
-
-const container = document.getElementById('container');
-if (container !== null) {
-    monaco.editor.create(container, {
-        value:
-            defaultString,
-        language: 'typescript'
-    });
-}
-
-console.log(ts);
-
-const sourceFile = ts.createSourceFile('input-file.ts', defaultString, ts.ScriptTarget.ES2016);
-
-const options = {
-    noEmit: true, emitDecoratorMetadata: true, experimentalDecorators: true, target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS, allowUnusedLabels: true,
 };
-console.log(sourceFile.fileName);
+BrowserFS.configure(fileSystemConfig, function (e) {
+    if (e) {
+        // An error occurred.
+        throw e;
+    }
+    // Otherwise, you can interact with the configured backends via our Node FS polyfill!
+    var fs = BrowserFS.BFSRequire('fs');
+    fs.readdir('/', function (e, contents) {
+        // etc.
+    });
 
-console.log(ts.createProgram([sourceFile.fileName], options));
+    const fileName = 'input-file.ts';
 
-console.log(sourceFile);
+    fs.writeFile(fileName, defaultTypescriptText, (err) => {
 
-console.log(typescriptJsonSchema);
+        if(err) throw err;
+
+        const sourceFile = ts.createSourceFile('input-file.ts', defaultTypescriptText, ts.ScriptTarget.ESNext);
+
+        console.log(sourceFile);
+
+        const options = {
+            // noEmit: true,
+            target: ts.ScriptTarget.ESNext,
+            module: ts.ModuleKind.ESNext,
+            lib: ["dom", "es6", "esnext", "esnext.symbol"],
+        };
+
+        // const compilerHost = ts.createCompilerHost(options, false);
+
+        console.log(`hey`);
+        const program = ts.createProgram([sourceFile.fileName], options);
+        console.log(`hey again`);
+        try {
+            const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
+            console.log(`hey again again`);
+            console.log(diagnostics);
+        } catch (error) {
+            console.error(error);
+        }
+
+        execFromProgram(program);
+        console.log(`hey again again end`);
+    });
+});
+
