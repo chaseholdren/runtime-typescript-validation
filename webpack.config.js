@@ -2,13 +2,17 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+// const os = require('node.os')
 
 const os = {
     platform: () => "browser",
-    EOL: '\r\n',
+    EOL: '\n',
 };
 
 module.exports = {
+    externals: {
+        os: 'os'
+    },
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".ts", ".tsx", ".js"],
@@ -26,7 +30,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            title: 'Runtime Typescript Validation'
+            title: 'Runtime Typescript Validation',
+            template: path.resolve(__dirname, 'public/index.html'),
         }),
         // Expose BrowserFS, process, and Buffer globals.
         // NOTE: If you intend to use BrowserFS in a script tag, you do not need
@@ -42,7 +47,7 @@ module.exports = {
     node: {
         process: false,
         Buffer: false,
-        os: true,
+        os: 'empty',
         module: 'empty'
     },
     mode: 'development',
