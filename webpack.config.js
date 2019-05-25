@@ -2,12 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-// const os = require('node.os')
-
-const os = {
-    platform: () => "browser",
-    EOL: '\n',
-};
 
 module.exports = {
     externals: {
@@ -18,7 +12,6 @@ module.exports = {
         extensions: [".ts", ".tsx", ".js"],
         // Use our versions of Node modules.
         alias: {
-            // 'os': require.resolve('node.os'),
             'fs': 'browserfs/dist/shims/fs.js',
             'buffer': 'browserfs/dist/shims/buffer.js',
             'path': 'browserfs/dist/shims/path.js',
@@ -40,7 +33,6 @@ module.exports = {
             BrowserFS: 'bfsGlobal',
             process: 'processGlobal',
             Buffer: 'bufferGlobal',
-            // os: os,
         })
     ],
     // DISABLE Webpack's built-in process and Buffer polyfills!
