@@ -1,5 +1,4 @@
-import "./typescriptServices";
-import * as ts from "./typescript";
+import * as ts from "typescript";
 const stringify = require('json-stable-stringify');
 const path = require('path');
 const createHash = require('create-hash');
