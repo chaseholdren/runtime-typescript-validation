@@ -1,8 +1,17 @@
-import * as stringify from "json-stable-stringify";
+// import * as glob from "glob";
+// import * as stringify from "json-stable-stringify";
+// import * as path from "path";
+// import createHash from "create-hash";
+// import * as ts from "typescript";
+// export { Program, CompilerOptions, Symbol } from "typescript";
 import ts from "typescript";
-import createHash from "create-hash";
 
-import vm from "vm";
+const glob = require('glob');
+const stringify = require('json-stable-stringify');
+const path = require('path');
+const createHash = require('create-hash');
+// const ts = require('typescript');
+const vm = require("vm");
 
 const REGEX_FILE_NAME_OR_SPACE = /(\bimport\(".*?"\)|".*?")\.| /g;
 const REGEX_TSCONFIG_NAME = /^.*\.json$/;
@@ -1059,8 +1068,6 @@ export function getProgramFromFiles(files: string[], jsonCompilerOptions: any = 
             options[k] = compilerOptions[k];
         }
     }
-    console.log(files);
-    console.log(options);
     return ts.createProgram(files, options);
 }
 
@@ -1100,7 +1107,7 @@ export function buildGenerator(program: ts.Program, args: PartialArgs = {}, only
         const workingDir = program.getCurrentDirectory();
 
         program.getSourceFiles().forEach((sourceFile, _sourceFileIdx) => {
-            const relativePath = sourceFile.fileName;
+            const relativePath = path.relative(workingDir, sourceFile.fileName);
 
             function inspect(node: ts.Node, tc: ts.TypeChecker) {
 
@@ -1169,7 +1176,28 @@ export function generateSchema(program: ts.Program, fullTypeName: string, args: 
     }
 }
 
+export function programFromConfig(configFileName: string, onlyIncludeFiles?: string[]): ts.Program {
+    // basically a copy of https://github.com/Microsoft/TypeScript/blob/3663d400270ccae8b69cbeeded8ffdc8fa12d7ad/src/compiler/tsc.ts -> parseConfigFile
+    const result = ts.parseConfigFileTextToJson(configFileName, ts.sys.readFile(configFileName)!);
+    const configObject = result.config;
 
+    const configParseResult = ts.parseJsonConfigFileContent(configObject, ts.sys, path.dirname(configFileName), {}, path.basename(configFileName));
+    const options = configParseResult.options;
+    options.noEmit = true;
+    delete options.out;
+    delete options.outDir;
+    delete options.outFile;
+    delete options.declaration;
+    delete options.declarationDir;
+    delete options.declarationMap;
+
+    const program = ts.createProgram({
+        rootNames: onlyIncludeFiles || configParseResult.fileNames,
+        options,
+        projectReferences: configParseResult.projectReferences
+    });
+    return program;
+}
 
 function normalizeFileName(fn: string): string {
     while (fn.substr(0, 2) === "./") {
@@ -1178,14 +1206,23 @@ function normalizeFileName(fn: string): string {
     return fn;
 }
 
-export function exec(fileNames: string[], fullTypeName: string, args = getDefaultArgs()) {
+export function exec(filePattern: string, fullTypeName: string, args = getDefaultArgs()) {
     let program: ts.Program;
     let onlyIncludeFiles: string[] | undefined = undefined;
-    onlyIncludeFiles = fileNames;
+    if (REGEX_TSCONFIG_NAME.test(path.basename(filePattern))) {
+        if (args.include && args.include.length > 0) {
+            const globs: string[][] = args.include.map(f => glob.sync(f));
+            onlyIncludeFiles = ([] as string[]).concat(...globs).map(normalizeFileName);
+        }
+        program = programFromConfig(filePattern, onlyIncludeFiles);
+    } else {
+        onlyIncludeFiles = glob.sync(filePattern);
+        if(typeof onlyIncludeFiles === 'undefined') onlyIncludeFiles = [];
         program = getProgramFromFiles(onlyIncludeFiles, {
             strictNullChecks: args.strictNullChecks
         });
         onlyIncludeFiles = onlyIncludeFiles.map(normalizeFileName);
+    }
 
     const definition = generateSchema(program, fullTypeName, args, onlyIncludeFiles);
     if (definition === null) {
@@ -1194,7 +1231,8 @@ export function exec(fileNames: string[], fullTypeName: string, args = getDefaul
 
     const json = stringify(definition, { space: 4 }) + "\n\n";
     if (args.out) {
-        console.log(args.out, json);
+        console.log(args.out);
+        console.log(json);
     } else {
         console.log(json);
     }

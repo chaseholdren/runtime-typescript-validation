@@ -1,9 +1,13 @@
-import ts from "typescript";
 import * as monaco from 'monaco-editor';
-import { exec } from './typescript-json-schema-browser';
+const typescriptJsonSchema = require('./typescript-json-schema');
+const ts = require('typescript');
+// import ts from "typescript";
 
-self.MonacoEnvironment = {
-    getWorkerUrl: function (moduleId, label) {
+// const monaco = require('monaco-editor').default;
+
+// @ts-ignore
+window.MonacoEnvironment = {
+    getWorkerUrl: function (moduleId: any, label: string): any {
         if (label === 'json') {
             return './json.worker.bundle.js';
         }
@@ -20,7 +24,9 @@ self.MonacoEnvironment = {
     }
 }
 
-var defaultString = String.raw `
+// default string region
+if (true) {
+    var defaultString = String.raw`
         enum MeleeStageName {
             fountainOfDreams = 'Fountain of Dreams',
                 pokemonStadium = 'Pokémon Stadium',
@@ -92,12 +98,16 @@ var defaultString = String.raw `
             didWin: boolean;
         }
         `;
+}
 
-monaco.editor.create(document.getElementById('container'), {
-    value: 
-        defaultString,
-    language: 'typescript'
-});
+const container = document.getElementById('container');
+if (container !== null) {
+    monaco.editor.create(container, {
+        value:
+            defaultString,
+        language: 'typescript'
+    });
+}
 
 console.log(ts);
 
@@ -111,3 +121,5 @@ console.log(sourceFile.fileName);
 console.log(ts.createProgram([sourceFile.fileName], options));
 
 console.log(sourceFile);
+
+console.log(typescriptJsonSchema);

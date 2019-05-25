@@ -1,0 +1,26 @@
+    {
+        "compilerOptions": {
+            "module": "commonjs",
+            "experimentalDecorators": true,
+            "allowSyntheticDefaultImports": true,
+            "strict": true,
+            "lib": ["es6", "dom"],
+            "target": "es5",
+            "composite": true,
+            "noEmitOnError": true,
+            "outDir": "types",
+            "declaration": true,
+            "declarationMap": true,
+            "sourceMap": true,
+            "moduleResolution": "node",
+            "alwaysStrict": true,
+            "strictNullChecks": true,
+            "forceConsistentCasingInFileNames": true,
+            "noImplicitReturns": true,
+            "noImplicitThis": true,
+            "noImplicitAny": true,
+            "suppressImplicitAnyIndexErrors": true,
+            "noUnusedLocals": true,
+            "downlevelIteration": true
+        }
+    }

@@ -1,37 +1,37 @@
 {
   "name": "runtime-typescript-validation",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "simpleserver": "http-server ./dist -p 8888",
+    "dev-server": "webpack-dev-server",
+    "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chaseholdren/runtime-typescript-validation.git"
-  },
-  "author": "Chase Holdren",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chaseholdren/runtime-typescript-validation/issues"
-  },
-  "homepage": "https://github.com/chaseholdren/runtime-typescript-validation#readme",
   "dependencies": {
+    "@types/create-hash": "^1.2.0",
+    "@types/glob": "^7.1.1",
+    "@types/json-stable-stringify": "^1.0.32",
     "browserfs": "^1.4.3",
+    "create-hash": "^1.2.0",
     "glob": "^7.1.4",
     "json-stable-stringify": "1.0.1",
+    "monaco-editor": "^0.14.3",
+    "node.os": "^1.2.4",
+    "source-map-support": "^0.4.3",
     "typescript": "^3.4.5"
   },
   "devDependencies": {
-    "create-hash": "^1.2.0",
+    "@types/node": "^12.0.2",
+    "@types/webpack": "^4.4.32",
+    "@types/webpack-dev-server": "^3.1.6",
+    "clean-webpack-plugin": "^2.0.2",
     "css-loader": "^1.0.0",
-    "http-server": "^0.11.1",
-    "json-stable-stringify": "1.0.1",
-    "monaco-editor": "^0.14.3",
+    "html-webpack-plugin": "^3.2.0",
+    "source-map": "^0.7.3",
     "style-loader": "^0.23.1",
-    "typescript": "^3.4.5",
+    "ts-loader": "^6.0.1",
+    "ts-node": "^8.1.1",
     "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.4.1"
   }
 }
