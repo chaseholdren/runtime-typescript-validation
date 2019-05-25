@@ -1,8 +1,9 @@
-import { execFromProgram } from './typescript-json-schema';
+// import { execFromProgram } from './typescript-json-schema';
 import defaultTypescriptText from "./default-editor-value.ts.text";
 import "./monaco-init";
 import * as ts from "typescript";
 import { getFileSystemAsync } from './browser-filesystem';
+import { generateSchema } from 'typescript-json-schema';
 
 (async () => {
     const fileName = 'input-file.ts';
@@ -13,8 +14,17 @@ import { getFileSystemAsync } from './browser-filesystem';
 
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ESNext);
 
-    const program = ts.createProgram([sourceFile.fileName], { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext });
+    const program = ts.createProgram([sourceFile.fileName], { target: ts.ScriptTarget.ES2016, module: ts.ModuleKind.ESNext });
 
-    execFromProgram(program);
+    const args = { ignoreErrors: true };
+
+    const jsonSchema = generateSchema(program, "SingleGame", args);
+    console.log(jsonSchema);
+
+    const json = JSON.stringify(jsonSchema, undefined, 1);
+
+    console.log(json);
+
+    // execFromProgram(program, "SingleGame");
 })();
 
