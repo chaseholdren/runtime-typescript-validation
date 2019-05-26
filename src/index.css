@@ -4,7 +4,7 @@
 }
 
 body {
-    background-image: url('/images/light-grey-terrazzo.png');
+    background-image: url('/light-grey-terrazzo.png');
     display: flex;
     flex-direction: column;
     justify-content: center;

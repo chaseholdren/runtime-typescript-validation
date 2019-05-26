@@ -33,11 +33,21 @@ import { default as Ajv } from 'ajv';
 
     const updateValidationEditor = async () => {
         const jsonSchema = JSON.parse(jsonSchemaEditor.getValue());
-        const jsonSchemaValidator = new Ajv().compile(jsonSchema);
-        const isInputValid = jsonSchemaValidator({});
+        const { SingleGame } = jsonSchema.definitions;
+
+        const singleGameJsonSchema = {
+            ...jsonSchema,
+            ...SingleGame,
+        };
+
+        const jsonSchemaValidator = new Ajv()
+            // .addSchema(jsonSchema)
+            .compile(singleGameJsonSchema);
+
+        const isInputValid = jsonSchemaValidator({didWin: "nope"});
 
         if (!isInputValid) {
-            validationOutputEditor.setValue(JSON.stringify(jsonSchemaValidator.errors));
+            validationOutputEditor.setValue(JSON.stringify(jsonSchemaValidator.errors, undefined, 1));
         } else {
             validationOutputEditor.setValue(JSON.stringify([]));
         }
