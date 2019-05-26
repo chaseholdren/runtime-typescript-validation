@@ -1,3 +1,18 @@
+export interface SingleGame {
+     /**
+     * The size of the shape.
+     *
+     * @minimum 0
+     * @TJS-type integer
+     */
+    length?: number;
+    stage?: MeleeStageName;
+    asCharacter?: MeleeCharacterName;
+    againstPlayer: string;
+    againstCharacter?: MeleeCharacterName;
+    didWin: boolean;
+}
+
 enum MeleeStageName {
     fountainOfDreams = 'Fountain of Dreams',
     pokemonStadium = 'Pokémon Stadium',
@@ -58,13 +73,4 @@ enum MeleeCharacterName {
     yoshi = 'Yoshi',
     youngLink = 'Young Link',
     zelda = 'Zelda',
-}
-
-export interface SingleGame {
-    length?: number;
-    stage?: MeleeStageName;
-    asCharacter?: MeleeCharacterName;
-    againstPlayer: string;
-    againstCharacter?: MeleeCharacterName;
-    didWin: boolean;
 }

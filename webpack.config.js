@@ -48,8 +48,6 @@ module.exports = {
         "app": './src/index.ts',
         "editor.worker": 'monaco-editor/esm/vs/editor/editor.worker.js',
         "json.worker": 'monaco-editor/esm/vs/language/json/json.worker',
-        "css.worker": 'monaco-editor/esm/vs/language/css/css.worker',
-        "html.worker": 'monaco-editor/esm/vs/language/html/html.worker',
         "ts.worker": 'monaco-editor/esm/vs/language/typescript/ts.worker',
     },
     output: {
@@ -79,5 +77,14 @@ module.exports = {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
         port: 9000
+    },
+    stats: {
+        warningsFilter: (warningText) => {
+            const annoyingWarningFirstLine = "./node_modules/typescript/lib/typescript.js 94814:19-45";
+            const annoyingWarningSecondLine = "Critical dependency: the request of a dependency is an expression";
+            const shouldFilter = warningText.includes(annoyingWarningFirstLine) && warningText.includes(annoyingWarningSecondLine);
+            
+            return shouldFilter;
+        }
     }
 };

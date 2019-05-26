@@ -1,6 +1,5 @@
-// import { execFromProgram } from './typescript-json-schema';
 import defaultTypescriptText from "./default-editor-value.ts.text";
-import "./monaco-init";
+import "./monaco-editor";
 import * as ts from "typescript";
 import { getFileSystemAsync } from './browser-filesystem';
 import { generateSchema } from 'typescript-json-schema';
@@ -18,13 +17,11 @@ import { generateSchema } from 'typescript-json-schema';
 
     const args = { ignoreErrors: true };
 
-    const jsonSchema = generateSchema(program, "SingleGame", args);
-    console.log(jsonSchema);
-
-    const json = JSON.stringify(jsonSchema, undefined, 1);
-
-    console.log(json);
-
-    // execFromProgram(program, "SingleGame");
+    const jsonSchema = generateSchema(program, "*", args);
+    const jsonSchemaString = JSON.stringify(jsonSchema, undefined, 1);
+    console.log(jsonSchemaString);
+    
+    const jsonSchemaOutputDomElement = document.getElementById('json-schema-output');
+    if (jsonSchemaOutputDomElement !== null) jsonSchemaOutputDomElement.innerHTML = jsonSchemaString;
 })();
 
