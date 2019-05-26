@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
     externals: {
@@ -24,7 +25,8 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             title: 'Runtime Typescript Validation',
-            template: path.resolve(__dirname, 'public/index.html'),
+            template: path.resolve(__dirname, 'src/index.html'),
+            showErrors: process.env.NODE_ENV === 'development',
         }),
         // Expose BrowserFS, process, and Buffer globals.
         // NOTE: If you intend to use BrowserFS in a script tag, you do not need
@@ -33,7 +35,13 @@ module.exports = {
             BrowserFS: 'bfsGlobal',
             process: 'processGlobal',
             Buffer: 'bufferGlobal',
-        })
+        }),
+        new MiniCssExtractPlugin({
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: '[name].css',
+            chunkFilename: '[id].css',
+        }),
     ],
     // DISABLE Webpack's built-in process and Buffer polyfills!
     node: {
@@ -46,6 +54,8 @@ module.exports = {
     devtool: "inline-source-map",
     entry: {
         "app": './src/index.ts',
+        // "html": "./src/index.html",
+        // "css": "./src/index.css",
         "editor.worker": 'monaco-editor/esm/vs/editor/editor.worker.js',
         "json.worker": 'monaco-editor/esm/vs/language/json/json.worker',
         "ts.worker": 'monaco-editor/esm/vs/language/typescript/ts.worker',
@@ -53,7 +63,8 @@ module.exports = {
     output: {
         globalObject: 'self',
         filename: '[name].bundle.js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'dist'),
+        // publicPath: path.resolve(__dirname, 'public'),
     },
     module: {
         noParse: /browserfs\.js/,
@@ -62,14 +73,30 @@ module.exports = {
                 test: /\.text$/i,
                 use: 'raw-loader',
             },
-            // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
             {
                 test: /\.tsx?$/,
                 loader: "ts-loader"
             },
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                use: [{
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            hmr: process.env.NODE_ENV === 'development',
+                        },
+                    },
+                    'css-loader',
+                ],
+            }, 
+            {
+                test: /\.(png|jpe?g|gif)$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: '[path][name].[ext]',
+                        // outputPath: 'images',
+                    },
+                }, ],
             },
         ]
     },

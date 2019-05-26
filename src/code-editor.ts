@@ -15,11 +15,14 @@ window.MonacoEnvironment = {
 
 const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     lineNumbers: "off",
-    roundedSelection: false,
+    // roundedSelection: false,
     scrollBeyondLastLine: false,
-    readOnly: false,
     theme: "vs-dark",
     autoIndent: true,
+    contextmenu: false,
+    glyphMargin: false,
+    formatOnPaste: true,
+    formatOnType: true,
     minimap: {
         enabled: false,
     }

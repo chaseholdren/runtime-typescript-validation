@@ -16,9 +16,8 @@ export const generateJsonSchema = async (typescriptString: string) => {
     const args = { ignoreErrors: true };
 
     const jsonSchema = generateSchema(program, "*", args);
-    const jsonSchemaString = JSON.stringify(jsonSchema, undefined, 1);
 
-    if (jsonSchemaString === null) throw new Error('JSON Schema Output was null.');
-
-    return jsonSchemaString;
+    if (jsonSchema === null) throw new Error('JSON Schema Output was null.');
+    
+    return jsonSchema;
 }
