@@ -16,6 +16,7 @@ window.MonacoEnvironment = {
 const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     lineNumbers: "off",
     // roundedSelection: false,
+    folding: false,
     scrollBeyondLastLine: false,
     theme: "vs-dark",
     autoIndent: true,
@@ -23,6 +24,7 @@ const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     glyphMargin: false,
     formatOnPaste: true,
     formatOnType: true,
+    automaticLayout: true,
     minimap: {
         enabled: false,
     }
@@ -40,7 +42,7 @@ export const createTypescriptEditor = (domElement: HTMLElement, codeEditorConten
 }
 
 export const createJsonEditor = (domElement: HTMLElement, codeEditorContents: string, options?: monaco.editor.IEditorConstructionOptions) => {
-    const combinedOptions = {
+    const combinedOptions: monaco.editor.IEditorConstructionOptions = {
         ...commonDefaultOptions,
         value: codeEditorContents,
         language: 'json',
@@ -48,4 +50,8 @@ export const createJsonEditor = (domElement: HTMLElement, codeEditorContents: st
     };
 
     return monaco.editor.create(domElement, combinedOptions);
+}
+
+export const onDidCreateEditor = (callback: () => void) => {
+    monaco.editor.onDidCreateEditor(callback);
 }

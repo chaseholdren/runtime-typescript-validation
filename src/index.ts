@@ -1,25 +1,46 @@
 import defaultTypescriptText from "./default-editor-value.ts.text";
 import './index.css';
-import { createTypescriptEditor, createJsonEditor } from "./code-editor";
+import './loading-spinner.css';
+import { createTypescriptEditor, createJsonEditor, onDidCreateEditor } from "./code-editor";
 import { generateJsonSchema } from './generate-json-schema';
 import { default as Ajv } from 'ajv';
+import Split from 'split.js';
 
-(async () => {
-    const typescriptContainer = document.getElementById('typescript-container');
-    const jsonSchemaContainer = document.getElementById('json-schema-container');
-    const validationOutputContainer = document.getElementById('validation-output-container');
+const typescriptContainer = document.getElementById('typescript-container');
+const jsonSchemaContainer = document.getElementById('json-schema-container');
+const validationOutputContainer = document.getElementById('validation-output-container');
 
-    if (jsonSchemaContainer === null || typescriptContainer === null || validationOutputContainer === null) throw new Error();
+if (jsonSchemaContainer === null || typescriptContainer === null || validationOutputContainer === null) throw new Error();
 
-    const typescriptEditor = createTypescriptEditor(typescriptContainer, defaultTypescriptText, {readOnly: false});
+const initPage = (async () => {
+    onDidCreateEditor(() => {
+        const loadingSpinners = document.querySelectorAll(".root-editors-container .loading-spinner");
+        loadingSpinners.forEach((spinner) => {
+            spinner.remove();
+        })
+    })
 
-    const validationOutputEditor = createJsonEditor(validationOutputContainer, JSON.stringify({errorCount: 1}));
+    const typescriptEditor = createTypescriptEditor(
+        typescriptContainer,
+        defaultTypescriptText,
+        { readOnly: false, extraEditorClassName: "typescript-editor" }
+    );
+
+    const validationOutputEditor = createJsonEditor(
+        validationOutputContainer,
+        JSON.stringify({ errorCount: 1 }),
+        { extraEditorClassName: "typescript-editor" }
+    );
 
     const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
     const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
 
-    const jsonSchemaEditor = createJsonEditor(jsonSchemaContainer, jsonSchemaString, { readOnly: true });
-
+    const jsonSchemaEditor = createJsonEditor(
+        jsonSchemaContainer,
+        jsonSchemaString,
+        { readOnly: true, extraEditorClassName: "typescript-editor" }
+    );
+    
     const updateJsonSchemaEditorFromTypescriptString = async (typescriptString: string) => {
         const generatedJsonSchema = await generateJsonSchema(typescriptString);
 
@@ -40,11 +61,11 @@ import { default as Ajv } from 'ajv';
             ...SingleGame,
         };
 
-        const jsonSchemaValidator = new Ajv()
+        const jsonSchemaValidator = new Ajv({ allErrors: true })
             // .addSchema(jsonSchema)
             .compile(singleGameJsonSchema);
 
-        const isInputValid = jsonSchemaValidator({didWin: "nope"});
+        const isInputValid = jsonSchemaValidator({ didWin: "nope" });
 
         if (!isInputValid) {
             validationOutputEditor.setValue(JSON.stringify(jsonSchemaValidator.errors, undefined, 1));
@@ -56,4 +77,20 @@ import { default as Ajv } from 'ajv';
     };
 
     await updateValidationEditor();
-})();
+
+    jsonSchemaEditor.getModel().onDidChangeContent(async () => {
+        await updateValidationEditor();
+    });
+
+    Split([typescriptContainer, jsonSchemaContainer, validationOutputContainer], {
+        gutterSize: 5,
+        onDragEnd: () => {
+            typescriptEditor.layout();
+            jsonSchemaEditor.layout();
+            validationOutputEditor.layout();
+        }
+    });
+});
+
+initPage();
+// if(false) initPage();
