@@ -90,9 +90,7 @@ module.exports = (env) => {
                     exclude: /node_modules/,
                     use: [
                         babelLoader,
-                        {
-                            loader: 'ts-loader'
-                        }
+                        'ts-loader'
                     ]
                 },
                 // {
