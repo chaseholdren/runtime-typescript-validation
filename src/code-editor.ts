@@ -10,7 +10,7 @@ const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     glyphMargin: false,
     formatOnPaste: true,
     formatOnType: true,
-    automaticLayout: true,
+    // automaticLayout: true,
     minimap: {
         enabled: false,
     }

@@ -1,15 +1,15 @@
 import defaultTypescriptText from "./default-editor-value.ts.text";
-import defaultJsonToValidate from './defaultJsonToValidate.json';
+import defaultValidationTarget from "./default-validation-target.ts.text";
 import './index.css';
 import './loading-spinner.css';
 import Split from 'split.js';
 
 const typescriptContainer = document.getElementById('typescript-container') as HTMLElement;
 const jsonSchemaContainer = document.getElementById('json-schema-container') as HTMLElement;
-const jsonObjectToValidateContainer = document.getElementById('json-object-to-validate-container') as HTMLElement;
+const objectToValidateContainer = document.getElementById('object-to-validate-container') as HTMLElement;
 const validationOutputContainer = document.getElementById('validation-output-container') as HTMLElement;
 
-const containerElements = [typescriptContainer, jsonSchemaContainer, jsonObjectToValidateContainer, validationOutputContainer]
+const containerElements = [typescriptContainer, jsonSchemaContainer, objectToValidateContainer, validationOutputContainer]
     .map((element) => {
         if (element === null) throw new Error();
         return element;
@@ -17,33 +17,26 @@ const containerElements = [typescriptContainer, jsonSchemaContainer, jsonObjectT
 
 let typescriptEditor: any = null;
 let jsonSchemaEditor: any = null;
-let jsonObjectToValidateEditor: any = null;
+let objectToValidateEditor: any = null;
 let validationOutputEditor: any = null;
-
-const safeHideEditor = (editor: any) => {
-    if (editor !== null) {
-        editor.getDomNode().hidden = true;
-    }
-}
-
-const safeShowEditor = (editor: any) => {
-    if (editor !== null) {
-        editor.getDomNode().hidden = false;
-        editor.layout();
-    }
-}
+const editors = [typescriptEditor, jsonSchemaEditor, objectToValidateEditor, validationOutputEditor];
 
 Split(containerElements, {
     gutterSize: 10,
     onDragStart: () => {
-        safeHideEditor(typescriptEditor);
-        safeHideEditor(jsonSchemaEditor);
-        safeHideEditor(validationOutputEditor);
+        for (const editor of editors) {
+            if (editor !== null) {
+                editor.getDomNode().hidden = true;
+            }
+        }
     },
     onDragEnd: () => {
-        safeShowEditor(typescriptEditor);
-        safeShowEditor(jsonSchemaEditor);
-        safeShowEditor(validationOutputEditor);
+        for (const editor of editors) {
+            if (editor !== null) {
+                editor.getDomNode().hidden = false;
+                editor.layout();
+            }
+        }
     }
 });
 
@@ -75,9 +68,9 @@ const createEditors = (async () => {
         { extraEditorClassName: "typescript-editor" }
     );
 
-    jsonObjectToValidateEditor = await codeEditorModule.createJsonEditor(
-        jsonObjectToValidateContainer,
-        JSON.stringify(defaultJsonToValidate, undefined, 1),
+    objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
+        objectToValidateContainer,
+        defaultValidationTarget,
         { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
     );
 
@@ -103,21 +96,24 @@ const createEditors = (async () => {
 
     const updateValidationEditor = async () => {
         const jsonSchema = JSON.parse(jsonSchemaEditor.getValue());
-        const firstDefinition = Object.values(jsonSchema.definitions)[0];
+
+        const validationInputSource = objectToValidateEditor.getValue();
+
+        const { definition, validationTarget } = eval(validationInputSource + '(() => {return validate;})();');
+
+        const targetDefinition = jsonSchema.definitions[definition];
 
         const jsonSchemaForFirstDefinition = {
             ...jsonSchema,
-            ...firstDefinition,
+            ...targetDefinition,
         };
 
         const jsonSchemaValidator = new Ajv({ allErrors: true })
             .compile(jsonSchemaForFirstDefinition);
 
-        const jsonToValidate = JSON.parse(jsonObjectToValidateEditor.getValue());
-
-        jsonSchemaValidator(jsonToValidate);
-
+        jsonSchemaValidator(validationTarget);
         const output = {
+            source: validationTarget,
             errors: jsonSchemaValidator.errors || [],
         }
         validationOutputEditor.setValue(JSON.stringify(output, undefined, 1));
@@ -129,7 +125,7 @@ const createEditors = (async () => {
         await updateValidationEditor();
     });
 
-    jsonObjectToValidateEditor.getModel().onDidChangeContent(async () => {
+    objectToValidateEditor.getModel().onDidChangeContent(async () => {
         await updateValidationEditor();
     });
 });
