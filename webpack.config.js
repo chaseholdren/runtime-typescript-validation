@@ -64,6 +64,9 @@ module.exports = (env) => {
             }),
             new MonacoWebpackPlugin({
                 languages: ['javascript', 'typescript', 'json']
+            }),
+            new webpack.DefinePlugin({
+                'process.platform': 0 // bypass process check
             })
         ],
         // DISABLE Webpack's built-in process and Buffer polyfills!
