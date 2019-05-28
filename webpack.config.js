@@ -7,7 +7,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 var babelLoader = {
     loader: 'babel-loader',
     options: {
-        cacheDirectory: true,
         presets: [
             ["@babel/preset-env", {
                 "targets": {
