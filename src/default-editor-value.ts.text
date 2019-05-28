@@ -1,6 +1,6 @@
 interface SingleGame {
      /**
-     * The size of the shape.
+     * The length of the game.
      *
      * @minimum 0
      * @TJS-type integer

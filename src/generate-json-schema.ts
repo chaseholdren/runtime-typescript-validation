@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import { getFileSystemAsync } from './browser-filesystem';
-import { generateSchema } from 'typescript-json-schema';
+import { generateSchema, Args } from 'typescript-json-schema';
 
 export const generateJsonSchema = async (typescriptString: string) => {
     const fileName = 'input-file.ts';
@@ -11,13 +11,22 @@ export const generateJsonSchema = async (typescriptString: string) => {
 
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ESNext);
 
-    const program = ts.createProgram([sourceFile.fileName], { target: ts.ScriptTarget.ES2016, module: ts.ModuleKind.ESNext });
+    const typescriptOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES2016,
+        module: ts.ModuleKind.ESNext,
+        strict: true,
+    };
 
-    const args = { ignoreErrors: true };
+    const program = ts.createProgram([sourceFile.fileName], typescriptOptions);
+
+    const args: Partial<Args> = {
+        ignoreErrors: true,
+
+    };
 
     const jsonSchema = generateSchema(program, "*", args);
 
     if (jsonSchema === null) throw new Error('JSON Schema Output was null.');
-    
+
     return jsonSchema;
 }

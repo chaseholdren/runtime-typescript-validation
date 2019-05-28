@@ -6,11 +6,10 @@ const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     scrollBeyondLastLine: false,
     theme: "vs-dark",
     autoIndent: true,
-    contextmenu: false,
-    glyphMargin: false,
     formatOnPaste: true,
     formatOnType: true,
-    // automaticLayout: true,
+    automaticLayout: true,
+    hideCursorInOverviewRuler: true,
     minimap: {
         enabled: false,
     }

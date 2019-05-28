@@ -12,32 +12,12 @@ const validationOutputContainer = document.getElementById('validation-output-con
 const containerElements = [typescriptContainer, jsonSchemaContainer, objectToValidateContainer, validationOutputContainer]
     .map((element) => {
         if (element === null) throw new Error();
+        element.childNodes.forEach(child => child.remove());
         return element;
     });
 
-let typescriptEditor: any = null;
-let jsonSchemaEditor: any = null;
-let objectToValidateEditor: any = null;
-let validationOutputEditor: any = null;
-const editors = [typescriptEditor, jsonSchemaEditor, objectToValidateEditor, validationOutputEditor];
-
 Split(containerElements, {
-    gutterSize: 10,
-    onDragStart: () => {
-        for (const editor of editors) {
-            if (editor !== null) {
-                editor.getDomNode().hidden = true;
-            }
-        }
-    },
-    onDragEnd: () => {
-        for (const editor of editors) {
-            if (editor !== null) {
-                editor.getDomNode().hidden = false;
-                editor.layout();
-            }
-        }
-    }
+    gutterSize: 12,
 });
 
 const createEditors = (async () => {
@@ -56,19 +36,19 @@ const createEditors = (async () => {
         })
     })
 
-    typescriptEditor = await codeEditorModule.createTypescriptEditor(
+    const typescriptEditor = await codeEditorModule.createTypescriptEditor(
         typescriptContainer,
         defaultTypescriptText,
         { readOnly: false, extraEditorClassName: "typescript-editor" }
     );
 
-    validationOutputEditor = await codeEditorModule.createJsonEditor(
+    const validationOutputEditor = await codeEditorModule.createJsonEditor(
         validationOutputContainer,
         JSON.stringify({ errorCount: 1 }),
         { extraEditorClassName: "typescript-editor" }
     );
 
-    objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
+    const objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
         objectToValidateContainer,
         defaultValidationTarget,
         { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
@@ -77,7 +57,7 @@ const createEditors = (async () => {
     const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
     const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
 
-    jsonSchemaEditor = await codeEditorModule.createJsonEditor(
+    const jsonSchemaEditor = await codeEditorModule.createJsonEditor(
         jsonSchemaContainer,
         jsonSchemaString,
         { readOnly: true, extraEditorClassName: "typescript-editor" }
@@ -99,7 +79,19 @@ const createEditors = (async () => {
 
         const validationInputSource = objectToValidateEditor.getValue();
 
-        const { definition, validationTarget } = eval(validationInputSource + '(() => {return validate;})();');
+        const editorOutput = {
+            definition: "",
+            validationTarget: {},
+        };
+
+        try {
+            const editorOutputAttempt = eval(`(() => {${validationInputSource} return validate;})()`);
+            editorOutput.definition = editorOutputAttempt.definition;
+            editorOutput.validationTarget = editorOutputAttempt.validationTarget;
+        } catch (error) {
+        }
+
+        const { definition, validationTarget } = editorOutput;
 
         const targetDefinition = jsonSchema.definitions[definition];
 
