@@ -1,10 +1,4 @@
-import monaco = require('monaco-editor');
-
-const loadMonaco = async () => {
-    const monaco = await import(/* webpackChunkName: "monaco-editor" */ 'monaco-editor');
-    console.log(monaco);
-    return monaco;
-}
+import * as monaco from 'monaco-editor';
 
 // @ts-ignore
 window.MonacoEnvironment = {
@@ -21,7 +15,6 @@ window.MonacoEnvironment = {
 
 const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     lineNumbers: "off",
-    // roundedSelection: false,
     folding: false,
     scrollBeyondLastLine: false,
     theme: "vs-dark",
@@ -67,11 +60,6 @@ export const createJsonEditor = async (domElement: HTMLElement, codeEditorConten
     return monaco.editor.create(domElement, combinedOptions);
 }
 
-const setOnDidCreateEditor = async (callback: () => void) => {
-    const monaco = await loadMonaco();
-    monaco.editor.onDidCreateEditor(callback);
-}
-
 export const onDidCreateEditor = (callback: () => void) => {
-    setOnDidCreateEditor(callback);
+    monaco.editor.onDidCreateEditor(callback);
 }

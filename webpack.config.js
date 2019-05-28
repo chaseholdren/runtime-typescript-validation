@@ -7,13 +7,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 var babelLoader = {
     loader: 'babel-loader',
     options: {
-        presets: [
-            ["@babel/preset-env", {
-                "targets": {
-                    "node": "current"
-                }
-            }]
-        ],
+        presets: ["@babel/preset-typescript"],
+        // presets: [
+        //     ["@babel/preset-env", {
+        //         "targets": {
+        //             "node": "current"
+        //         }
+        //     }]
+        // ],
         plugins: ["@babel/plugin-syntax-dynamic-import"],
     }
 };
@@ -76,34 +77,40 @@ module.exports = (env) => {
         output: {
             globalObject: 'self',
             filename: '[name].bundle.js',
+            chunkFilename: '[name].chunk.js',
             path: path.resolve(__dirname, 'dist'),
         },
         module: {
-            // noParse: /browserfs\.js/,
+            noParse: /browserfs\.js/,
             rules: [{
                     test: /\.text$/i,
                     use: 'raw-loader',
                 },
-                {
-                    test: /\.tsx?$/,
-                    exclude: /node_modules/,
-                    use: [
-                        babelLoader,
-                        'ts-loader'
-                    ]
-                },
+
+                // {
+                //     test: /\.tsx?$/,
+                //     exclude: /node_modules/,
+                //     use: [
+                //         babelLoader,
+                //         'ts-loader'
+                //     ]
+                // },
+
                 // {
                 //     test: /\.tsx?$/,
                 //     loader: "ts-loader"
                 // },
+
+                                {
+                                    test: /\.tsx?$/,
+                                    loader: babelLoader,
+                                }, 
                                 // {
-                                //     test: /\.tsx?$/,
-                                //     loader: 'babel-loader',
-                                // }, {
                                 //     test: /\.js$/,
                                 //     use: ["source-map-loader"],
                                 //     enforce: "pre"
                                 // },
+
                 {
                     test: /\.css$/,
                     use: [{

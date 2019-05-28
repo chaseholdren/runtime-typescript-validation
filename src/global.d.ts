@@ -1,4 +1,3 @@
-
 declare module '*.ts.text'
 
 
