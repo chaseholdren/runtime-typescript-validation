@@ -1,12 +1,12 @@
     {
         "compilerOptions": {
             "strict": true,
-            "module": "commonjs",
+            "module": "esnext",
             "lib": ["es6", "dom", "es2016", "esnext"],
             "target": "es6",
             "outDir": "types",
-            "declaration": true,
-            "declarationMap": true,
+            "declaration": false,
+            "declarationMap": false,
             "sourceMap": true,
             "moduleResolution": "node",
             "alwaysStrict": true,

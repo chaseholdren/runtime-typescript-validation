@@ -105,11 +105,11 @@ module.exports = (env) => {
                                     test: /\.tsx?$/,
                                     loader: babelLoader,
                                 }, 
-                                // {
-                                //     test: /\.js$/,
-                                //     use: ["source-map-loader"],
-                                //     enforce: "pre"
-                                // },
+                                {
+                                    test: /\.js$/,
+                                    use: ["source-map-loader"],
+                                    enforce: "pre"
+                                },
 
                 {
                     test: /\.css$/,
