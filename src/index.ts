@@ -1,16 +1,23 @@
 import defaultTypescriptText from "./default-editor-value.ts.text";
+import defaultJsonToValidate from './defaultJsonToValidate.json';
 import './index.css';
 import './loading-spinner.css';
 import Split from 'split.js';
 
-const typescriptContainer = document.getElementById('typescript-container');
-const jsonSchemaContainer = document.getElementById('json-schema-container');
-const validationOutputContainer = document.getElementById('validation-output-container');
+const typescriptContainer = document.getElementById('typescript-container') as HTMLElement;
+const jsonSchemaContainer = document.getElementById('json-schema-container') as HTMLElement;
+const jsonObjectToValidateContainer = document.getElementById('json-object-to-validate-container') as HTMLElement;
+const validationOutputContainer = document.getElementById('validation-output-container') as HTMLElement;
 
-if (jsonSchemaContainer === null || typescriptContainer === null || validationOutputContainer === null) throw new Error();
+const containerElements = [typescriptContainer, jsonSchemaContainer, jsonObjectToValidateContainer, validationOutputContainer]
+    .map((element) => {
+        if (element === null) throw new Error();
+        return element;
+    });
 
 let typescriptEditor: any = null;
 let jsonSchemaEditor: any = null;
+let jsonObjectToValidateEditor: any = null;
 let validationOutputEditor: any = null;
 
 const safeHideEditor = (editor: any) => {
@@ -26,7 +33,7 @@ const safeShowEditor = (editor: any) => {
     }
 }
 
-Split([typescriptContainer, jsonSchemaContainer, validationOutputContainer], {
+Split(containerElements, {
     gutterSize: 10,
     onDragStart: () => {
         safeHideEditor(typescriptEditor);
@@ -40,14 +47,14 @@ Split([typescriptContainer, jsonSchemaContainer, validationOutputContainer], {
     }
 });
 
-const createEditors = (async () => {    
+const createEditors = (async () => {
     const codeEditorModulePromise = import(/* webpackChunkName: "code-editor" */'./code-editor');
     const ajvModulePromise = import(/* webpackChunkName: "ajv" */'ajv');
     const generateJsonSchemaModulePromise = import(/* webpackChunkName: "generate-json-schema" */'./generate-json-schema');
     const codeEditorModule = await codeEditorModulePromise;
     const ajv = await ajvModulePromise;
     const Ajv = ajv.default;
-    const generateJsonSchemaModule = await generateJsonSchemaModulePromise;
+    const generateJsonSchema = (await generateJsonSchemaModulePromise).generateJsonSchema;
 
     codeEditorModule.onDidCreateEditor(() => {
         const loadingSpinners = document.querySelectorAll(".root-editors-container .loading-spinner");
@@ -68,7 +75,13 @@ const createEditors = (async () => {
         { extraEditorClassName: "typescript-editor" }
     );
 
-    const generatedJsonSchema = await generateJsonSchemaModule.generateJsonSchema(defaultTypescriptText);
+    jsonObjectToValidateEditor = await codeEditorModule.createJsonEditor(
+        jsonObjectToValidateContainer,
+        JSON.stringify(defaultJsonToValidate, undefined, 1),
+        { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
+    );
+
+    const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
     const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
 
     jsonSchemaEditor = await codeEditorModule.createJsonEditor(
@@ -78,7 +91,7 @@ const createEditors = (async () => {
     );
 
     const updateJsonSchemaEditorFromTypescriptString = async (typescriptString: string) => {
-        const generatedJsonSchema = await generateJsonSchemaModule.generateJsonSchema(typescriptString);
+        const generatedJsonSchema = await generateJsonSchema(typescriptString);
 
         const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
         jsonSchemaEditor.setValue(jsonSchemaString);
@@ -90,29 +103,33 @@ const createEditors = (async () => {
 
     const updateValidationEditor = async () => {
         const jsonSchema = JSON.parse(jsonSchemaEditor.getValue());
-        const { SingleGame } = jsonSchema.definitions;
+        const firstDefinition = Object.values(jsonSchema.definitions)[0];
 
-        const singleGameJsonSchema = {
+        const jsonSchemaForFirstDefinition = {
             ...jsonSchema,
-            ...SingleGame,
+            ...firstDefinition,
         };
 
         const jsonSchemaValidator = new Ajv({ allErrors: true })
-            // .addSchema(jsonSchema)
-            .compile(singleGameJsonSchema);
+            .compile(jsonSchemaForFirstDefinition);
 
-        const isInputValid = jsonSchemaValidator({ didWin: "nope" });
+        const jsonToValidate = JSON.parse(jsonObjectToValidateEditor.getValue());
 
-        if (!isInputValid) {
-            validationOutputEditor.setValue(JSON.stringify(jsonSchemaValidator.errors, undefined, 1));
-        } else {
-            validationOutputEditor.setValue(JSON.stringify([]));
+        jsonSchemaValidator(jsonToValidate);
+
+        const output = {
+            errors: jsonSchemaValidator.errors || [],
         }
+        validationOutputEditor.setValue(JSON.stringify(output, undefined, 1));
     };
 
     await updateValidationEditor();
 
     jsonSchemaEditor.getModel().onDidChangeContent(async () => {
+        await updateValidationEditor();
+    });
+
+    jsonObjectToValidateEditor.getModel().onDidChangeContent(async () => {
         await updateValidationEditor();
     });
 });
