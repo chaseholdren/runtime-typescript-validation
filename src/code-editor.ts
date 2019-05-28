@@ -1,18 +1,5 @@
 import * as monaco from 'monaco-editor';
 
-// @ts-ignore
-window.MonacoEnvironment = {
-    getWorkerUrl: function (moduleId: any, label: string): any {
-        if (label === 'json') {
-            return './json.worker.bundle.js';
-        }
-        if (label === 'typescript' || label === 'javascript') {
-            return './ts.worker.bundle.js';
-        }
-        return './editor.worker.bundle.js';
-    }
-}
-
 const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     lineNumbers: "off",
     folding: false,

@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 var babelLoader = {
     loader: 'babel-loader',
@@ -61,6 +62,9 @@ module.exports = (env) => {
                 filename: '[name].css',
                 chunkFilename: '[id].css',
             }),
+            new MonacoWebpackPlugin({
+                languages: ['javascript', 'typescript', 'json']
+            })
         ],
         // DISABLE Webpack's built-in process and Buffer polyfills!
         node: {
@@ -77,8 +81,13 @@ module.exports = (env) => {
         output: {
             globalObject: 'self',
             filename: '[name].bundle.js',
-            chunkFilename: '[name].chunk.js',
+            chunkFilename: '[name].bundle.js',
             path: path.resolve(__dirname, 'dist'),
+        },
+        optimization: {
+            splitChunks: {
+                chunks: 'all',
+            },
         },
         module: {
             noParse: /browserfs\.js/,
@@ -105,11 +114,11 @@ module.exports = (env) => {
                                     test: /\.tsx?$/,
                                     loader: babelLoader,
                                 }, 
-                                {
-                                    test: /\.js$/,
-                                    use: ["source-map-loader"],
-                                    enforce: "pre"
-                                },
+                                // {
+                                //     test: /\.js$/,
+                                //     use: ["source-map-loader"],
+                                //     enforce: "pre"
+                                // },
 
                 {
                     test: /\.css$/,

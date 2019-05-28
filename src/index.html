@@ -11,7 +11,20 @@
         platform: () => "browser",
         EOL: '\n',
     };
+
+    window.MonacoEnvironment = {
+        getWorkerUrl: function (moduleId, label) {
+            if (label === 'json') {
+                return './json.worker.bundle.js';
+            }
+            if (label === 'typescript' || label === 'javascript') {
+                return './ts.worker.bundle.js';
+            }
+            return './editor.worker.bundle.js';
+        }
+    }
 </script>
+
 <body>
     <h1 class="title">runtime typescript validation</h1>
     <div class="root-editors-container">
