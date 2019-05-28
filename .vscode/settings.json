@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.ts.text": "typescript",
+        "*.json.text": "json"
+    }
+}

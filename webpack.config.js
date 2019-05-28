@@ -4,6 +4,21 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+var babelLoader = {
+    loader: 'babel-loader',
+    options: {
+        cacheDirectory: true,
+        presets: [
+            ["@babel/preset-env", {
+                "targets": {
+                    "node": "current"
+                }
+            }]
+        ],
+        plugins: ["@babel/plugin-syntax-dynamic-import"],
+    }
+};
+
 module.exports = (env) => {
 
     const isProduction = env === 'prod' || env === 'production';
@@ -72,8 +87,26 @@ module.exports = (env) => {
                 },
                 {
                     test: /\.tsx?$/,
-                    loader: "ts-loader"
+                    exclude: /node_modules/,
+                    use: [
+                        babelLoader,
+                        {
+                            loader: 'ts-loader'
+                        }
+                    ]
                 },
+                // {
+                //     test: /\.tsx?$/,
+                //     loader: "ts-loader"
+                // },
+                                // {
+                                //     test: /\.tsx?$/,
+                                //     loader: 'babel-loader',
+                                // }, {
+                                //     test: /\.js$/,
+                                //     use: ["source-map-loader"],
+                                //     enforce: "pre"
+                                // },
                 {
                     test: /\.css$/,
                     use: [{

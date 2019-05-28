@@ -1,4 +1,10 @@
-import * as monaco from 'monaco-editor';
+import monaco = require('monaco-editor');
+
+const loadMonaco = async () => {
+    const monaco = await import(/* webpackChunkName: "monaco-editor" */ 'monaco-editor');
+    console.log(monaco);
+    return monaco;
+}
 
 // @ts-ignore
 window.MonacoEnvironment = {
@@ -30,7 +36,16 @@ const commonDefaultOptions: monaco.editor.IEditorConstructionOptions = {
     }
 };
 
-export const createTypescriptEditor = (domElement: HTMLElement, codeEditorContents: string, options?: monaco.editor.IEditorConstructionOptions) => {
+export const hideEditor = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    editor.getDomNode().hidden = true;
+}
+
+export const showEditor = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    editor.getDomNode().hidden = false;
+}
+
+export const createTypescriptEditor = async (domElement: HTMLElement, codeEditorContents: string, options?: monaco.editor.IEditorConstructionOptions) => {
+    
     const combinedOptions = {
         ...commonDefaultOptions,
         value: codeEditorContents,
@@ -41,7 +56,7 @@ export const createTypescriptEditor = (domElement: HTMLElement, codeEditorConten
     return monaco.editor.create(domElement, combinedOptions);
 }
 
-export const createJsonEditor = (domElement: HTMLElement, codeEditorContents: string, options?: monaco.editor.IEditorConstructionOptions) => {
+export const createJsonEditor = async (domElement: HTMLElement, codeEditorContents: string, options?: monaco.editor.IEditorConstructionOptions) => {
     const combinedOptions: monaco.editor.IEditorConstructionOptions = {
         ...commonDefaultOptions,
         value: codeEditorContents,
@@ -52,6 +67,11 @@ export const createJsonEditor = (domElement: HTMLElement, codeEditorContents: st
     return monaco.editor.create(domElement, combinedOptions);
 }
 
-export const onDidCreateEditor = (callback: () => void) => {
+const setOnDidCreateEditor = async (callback: () => void) => {
+    const monaco = await loadMonaco();
     monaco.editor.onDidCreateEditor(callback);
+}
+
+export const onDidCreateEditor = (callback: () => void) => {
+    setOnDidCreateEditor(callback);
 }

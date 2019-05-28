@@ -1,18 +1,17 @@
 .title {
     width: 100vw;
     text-align: center;
+    font-size: 5em;
 }
 
 body {
-    background-image: url('images/light-grey-terrazzo.png');
+    background-image: url('images/wov.png');
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: start;
     align-items: stretch;
-    height: 100vh;
-    overflow: hidden;
-    /* margin-left: 1%;
-        margin-right: 1%; */
+    overflow-x: hidden;
+    font-family: 'Yatra One', cursive;
 }
 
 .root-editors-container {
@@ -38,7 +37,7 @@ body {
 }
 
 .gutter {
-    background-color: red;
+    background-color: rgb(0, 112, 103);
     background-repeat: no-repeat;
     max-height: 600px;
     height: 600px;
