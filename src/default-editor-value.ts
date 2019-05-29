@@ -1,4 +1,7 @@
-interface SingleGame {
+// const Validator = require('./validate');
+import Validator from './validate';
+
+export interface SingleGame {
      /**
      * The length of the game.
      *
@@ -74,3 +77,5 @@ enum MeleeCharacterName {
     youngLink = 'Young Link',
     zelda = 'Zelda',
 }
+
+export const gameValidator = new Validator<SingleGame>();

@@ -1,8 +1,19 @@
-import defaultTypescriptText from "./default-editor-value.ts.text";
-import defaultValidationTarget from "./default-validation-target.ts.text";
+// const defaultTypescriptText = require("!!raw-loader!./default-editor-value");
+// const gameValidator = require("./default-editor-value").gameValidator;
+// const defaultValidationTarget = require("./default-validation-target");
+// require("./index.css");
+// require("./loading-spinner.css");
+// const split = require("split.js");
+
+import defaultTypescriptText from "!!raw-loader!./default-editor-value";
+import { gameValidator } from "./default-editor-value";
+import defaultValidationTarget from "./default-validation-target";
 import './index.css';
 import './loading-spinner.css';
 import Split from 'split.js';
+
+console.log(defaultTypescriptText);
+console.log(gameValidator.validate({}));
 
 const typescriptContainer = document.getElementById('typescript-container') as HTMLElement;
 const jsonSchemaContainer = document.getElementById('json-schema-container') as HTMLElement;
@@ -23,11 +34,13 @@ Split(containerElements, {
 const createEditors = (async () => {
     const codeEditorModulePromise = import(/* webpackChunkName: "code-editor" */'./code-editor');
     const ajvModulePromise = import(/* webpackChunkName: "ajv" */'ajv');
-    const generateJsonSchemaModulePromise = import(/* webpackChunkName: "generate-json-schema" */'./generate-json-schema');
     const codeEditorModule = await codeEditorModulePromise;
     const ajv = await ajvModulePromise;
     const Ajv = ajv.default;
-    const generateJsonSchema = (await generateJsonSchemaModulePromise).generateJsonSchema;
+
+    const defaultTypescriptJsonSchema = {
+
+    };
 
     codeEditorModule.onDidCreateEditor(() => {
         const loadingSpinners = document.querySelectorAll(".root-editors-container .loading-spinner");
@@ -50,12 +63,12 @@ const createEditors = (async () => {
 
     const objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
         objectToValidateContainer,
-        defaultValidationTarget,
+        JSON.stringify(defaultValidationTarget, undefined, 1),
         { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
     );
 
-    const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
-    const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
+    // const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
+    const jsonSchemaString = JSON.stringify(defaultTypescriptJsonSchema, undefined, 1);
 
     const jsonSchemaEditor = await codeEditorModule.createJsonEditor(
         jsonSchemaContainer,
@@ -64,10 +77,10 @@ const createEditors = (async () => {
     );
 
     const updateJsonSchemaEditorFromTypescriptString = async (typescriptString: string) => {
-        const generatedJsonSchema = await generateJsonSchema(typescriptString);
+        // const generatedJsonSchema = await generateJsonSchema(typescriptString);
 
-        const jsonSchemaString = JSON.stringify(generatedJsonSchema, undefined, 1);
-        jsonSchemaEditor.setValue(jsonSchemaString);
+        const newJsonSchemaString = JSON.stringify(jsonSchemaString, undefined, 1);
+        jsonSchemaEditor.setValue(newJsonSchemaString);
     }
 
     typescriptEditor.getModel().onDidChangeContent(async () => {

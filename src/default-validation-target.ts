@@ -7,3 +7,5 @@ const validate = {
     definition: "SingleGame",
     validationTarget,
 };
+
+export default validate;

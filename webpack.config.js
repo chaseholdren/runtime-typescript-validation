@@ -9,13 +9,6 @@ var babelLoader = {
     loader: 'babel-loader',
     options: {
         presets: ["@babel/preset-typescript"],
-        // presets: [
-        //     ["@babel/preset-env", {
-        //         "targets": {
-        //             "node": "current"
-        //         }
-        //     }]
-        // ],
         plugins: ["@babel/plugin-syntax-dynamic-import"],
     }
 };
@@ -91,6 +84,12 @@ module.exports = (env) => {
             splitChunks: {
                 chunks: 'all',
             },
+        }, 
+        resolveLoader: {
+            modules: [
+                'node_modules',
+                path.resolve(__dirname, 'loaders')
+            ]
         },
         module: {
             noParse: /browserfs\.js/,
@@ -98,31 +97,13 @@ module.exports = (env) => {
                     test: /\.text$/i,
                     use: 'raw-loader',
                 },
-
-                // {
-                //     test: /\.tsx?$/,
-                //     exclude: /node_modules/,
-                //     use: [
-                //         babelLoader,
-                //         'ts-loader'
-                //     ]
-                // },
-
-                // {
-                //     test: /\.tsx?$/,
-                //     loader: "ts-loader"
-                // },
-
-                                {
-                                    test: /\.tsx?$/,
-                                    loader: babelLoader,
-                                }, 
-                                // {
-                                //     test: /\.js$/,
-                                //     use: ["source-map-loader"],
-                                //     enforce: "pre"
-                                // },
-
+                {
+                    test: /\.tsx?$/,
+                    use: [
+                        babelLoader,
+                        'typescript-json-schema-loader',
+                    ]
+                },
                 {
                     test: /\.css$/,
                     use: [{
