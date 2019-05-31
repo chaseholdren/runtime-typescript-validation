@@ -3,13 +3,15 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+// const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 var babelLoader = {
     loader: 'babel-loader',
     options: {
         presets: ["@babel/preset-typescript"],
-        plugins: ["@babel/plugin-syntax-dynamic-import"],
+        plugins: ["@babel/plugin-syntax-dynamic-import", 
+            "@babel/plugin-proposal-class-properties",
+            "@babel/plugin-proposal-private-methods"],
     }
 };
 
@@ -49,15 +51,15 @@ module.exports = (env) => {
                 process: 'processGlobal',
                 Buffer: 'bufferGlobal',
             }),
-            new MiniCssExtractPlugin({
-                // Options similar to the same options in webpackOptions.output
-                // both options are optional
-                filename: '[name].css',
-                chunkFilename: '[id].css',
-            }),
-            new MonacoWebpackPlugin({
-                languages: ['javascript', 'typescript', 'json']
-            }),
+            // new MiniCssExtractPlugin({
+            //     // Options similar to the same options in webpackOptions.output
+            //     // both options are optional
+            //     filename: '[name].css',
+            //     chunkFilename: '[id].css',
+            // }),
+            // new MonacoWebpackPlugin({
+            //     languages: ['javascript', 'typescript', 'json']
+            // }),
             new webpack.DefinePlugin({
                 'process.platform': 0 // bypass process check
             })
@@ -104,16 +106,21 @@ module.exports = (env) => {
                         'typescript-json-schema-loader',
                     ]
                 },
+                // {
+                //     test: /\.css$/,
+                //     use: [{
+                //         loader: MiniCssExtractPlugin.loader,
+                //         options: {
+                //             hmr: process.env.NODE_ENV === 'development',
+
+                //         },
+                //     },
+                //         'css-loader',
+                //     ],
+                // },
                 {
                     test: /\.css$/,
-                    use: [{
-                            loader: MiniCssExtractPlugin.loader,
-                            options: {
-                                hmr: process.env.NODE_ENV === 'development',
-                            },
-                        },
-                        'css-loader',
-                    ],
+                    use: ['style-loader', 'css-loader']
                 },
                 {
                     test: /\.(png|jpe?g|gif)$/,

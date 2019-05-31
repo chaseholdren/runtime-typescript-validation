@@ -1,7 +1,8 @@
-import Ajv from 'ajv';
+import * as ajv from 'ajv';
+// import {Ajv} from 'ajv';
 
 // const ajv = require('ajv');
-// const Ajv = ajv.default;
+const Ajv = ajv.default;
 
 interface ValidResult<T> {
     isValid: true;
@@ -17,7 +18,7 @@ type ValidationResult<T> = ValidResult<T> | InvalidResult<T>;
 
 export default class Validator<T extends {}> {
     private jsonSchema: {};
-    private validator?: Ajv.ValidateFunction;
+    private validator?: ajv.ValidateFunction;
     internalCompileValidator = () => {
 
         this.validator = new Ajv({ allErrors: true })

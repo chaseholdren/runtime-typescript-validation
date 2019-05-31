@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@babel/plugin-proposal-private-methods": "^7.4.4",
     "@babel/traverse": "^7.4.5",
     "@types/create-hash": "^1.2.0",
     "@types/glob": "^7.1.1",
@@ -27,6 +28,7 @@
     "@babel/core": "^7.4.5",
     "@babel/node": "^7.4.5",
     "@babel/parser": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-typescript": "^7.3.3",

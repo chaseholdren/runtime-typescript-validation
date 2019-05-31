@@ -32,107 +32,107 @@ Split(containerElements, {
 });
 
 const createEditors = (async () => {
-    const codeEditorModulePromise = import(/* webpackChunkName: "code-editor" */'./code-editor');
-    const ajvModulePromise = import(/* webpackChunkName: "ajv" */'ajv');
-    const codeEditorModule = await codeEditorModulePromise;
-    const ajv = await ajvModulePromise;
-    const Ajv = ajv.default;
+    // const codeEditorModulePromise = import(/* webpackChunkName: "code-editor" */'./code-editor');
+    // const ajvModulePromise = import(/* webpackChunkName: "ajv" */'ajv');
+    // const codeEditorModule = await codeEditorModulePromise;
+    // const ajv = await ajvModulePromise;
+    // const Ajv = ajv.default;
 
-    const defaultTypescriptJsonSchema = {
+    // const defaultTypescriptJsonSchema = {
 
-    };
+    // };
 
-    codeEditorModule.onDidCreateEditor(() => {
-        const loadingSpinners = document.querySelectorAll(".root-editors-container .loading-spinner");
-        loadingSpinners.forEach((spinner) => {
-            spinner.remove();
-        })
-    })
+    // codeEditorModule.onDidCreateEditor(() => {
+    //     const loadingSpinners = document.querySelectorAll(".root-editors-container .loading-spinner");
+    //     loadingSpinners.forEach((spinner) => {
+    //         spinner.remove();
+    //     })
+    // })
 
-    const typescriptEditor = await codeEditorModule.createTypescriptEditor(
-        typescriptContainer,
-        defaultTypescriptText,
-        { readOnly: false, extraEditorClassName: "typescript-editor" }
-    );
+    // const typescriptEditor = await codeEditorModule.createTypescriptEditor(
+    //     typescriptContainer,
+    //     defaultTypescriptText,
+    //     { readOnly: false, extraEditorClassName: "typescript-editor" }
+    // );
 
-    const validationOutputEditor = await codeEditorModule.createJsonEditor(
-        validationOutputContainer,
-        JSON.stringify({ errorCount: 1 }),
-        { extraEditorClassName: "typescript-editor" }
-    );
+    // const validationOutputEditor = await codeEditorModule.createJsonEditor(
+    //     validationOutputContainer,
+    //     JSON.stringify({ errorCount: 1 }),
+    //     { extraEditorClassName: "typescript-editor" }
+    // );
 
-    const objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
-        objectToValidateContainer,
-        JSON.stringify(defaultValidationTarget, undefined, 1),
-        { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
-    );
+    // const objectToValidateEditor = await codeEditorModule.createTypescriptEditor(
+    //     objectToValidateContainer,
+    //     JSON.stringify(defaultValidationTarget, undefined, 1),
+    //     { readOnly: false, extraEditorClassName: "json-object-to-validate-editor" }
+    // );
 
-    // const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
-    const jsonSchemaString = JSON.stringify(defaultTypescriptJsonSchema, undefined, 1);
+    // // const generatedJsonSchema = await generateJsonSchema(defaultTypescriptText);
+    // const jsonSchemaString = JSON.stringify(defaultTypescriptJsonSchema, undefined, 1);
 
-    const jsonSchemaEditor = await codeEditorModule.createJsonEditor(
-        jsonSchemaContainer,
-        jsonSchemaString,
-        { readOnly: true, extraEditorClassName: "typescript-editor" }
-    );
+    // const jsonSchemaEditor = await codeEditorModule.createJsonEditor(
+    //     jsonSchemaContainer,
+    //     jsonSchemaString,
+    //     { readOnly: true, extraEditorClassName: "typescript-editor" }
+    // );
 
-    const updateJsonSchemaEditorFromTypescriptString = async (typescriptString: string) => {
-        // const generatedJsonSchema = await generateJsonSchema(typescriptString);
+    // const updateJsonSchemaEditorFromTypescriptString = async (typescriptString: string) => {
+    //     // const generatedJsonSchema = await generateJsonSchema(typescriptString);
 
-        const newJsonSchemaString = JSON.stringify(jsonSchemaString, undefined, 1);
-        jsonSchemaEditor.setValue(newJsonSchemaString);
-    }
+    //     const newJsonSchemaString = JSON.stringify(jsonSchemaString, undefined, 1);
+    //     jsonSchemaEditor.setValue(newJsonSchemaString);
+    // }
 
-    typescriptEditor.getModel().onDidChangeContent(async () => {
-        await updateJsonSchemaEditorFromTypescriptString(typescriptEditor.getValue());
-    });
+    // typescriptEditor.getModel().onDidChangeContent(async () => {
+    //     await updateJsonSchemaEditorFromTypescriptString(typescriptEditor.getValue());
+    // });
 
-    const updateValidationEditor = async () => {
-        const jsonSchema = JSON.parse(jsonSchemaEditor.getValue());
+    // const updateValidationEditor = async () => {
+    //     const jsonSchema = JSON.parse(jsonSchemaEditor.getValue());
 
-        const validationInputSource = objectToValidateEditor.getValue();
+    //     const validationInputSource = objectToValidateEditor.getValue();
 
-        const editorOutput = {
-            definition: "",
-            validationTarget: {},
-        };
+    //     const editorOutput = {
+    //         definition: "",
+    //         validationTarget: {},
+    //     };
 
-        try {
-            const editorOutputAttempt = eval(`(() => {${validationInputSource} return validate;})()`);
-            editorOutput.definition = editorOutputAttempt.definition;
-            editorOutput.validationTarget = editorOutputAttempt.validationTarget;
-        } catch (error) {
-        }
+    //     try {
+    //         const editorOutputAttempt = eval(`(() => {${validationInputSource} return validate;})()`);
+    //         editorOutput.definition = editorOutputAttempt.definition;
+    //         editorOutput.validationTarget = editorOutputAttempt.validationTarget;
+    //     } catch (error) {
+    //     }
 
-        const { definition, validationTarget } = editorOutput;
+    //     const { definition, validationTarget } = editorOutput;
 
-        const targetDefinition = jsonSchema.definitions[definition];
+    //     const targetDefinition = jsonSchema.definitions[definition];
 
-        const jsonSchemaForFirstDefinition = {
-            ...jsonSchema,
-            ...targetDefinition,
-        };
+    //     const jsonSchemaForFirstDefinition = {
+    //         ...jsonSchema,
+    //         ...targetDefinition,
+    //     };
 
-        const jsonSchemaValidator = new Ajv({ allErrors: true })
-            .compile(jsonSchemaForFirstDefinition);
+    //     const jsonSchemaValidator = new Ajv({ allErrors: true })
+    //         .compile(jsonSchemaForFirstDefinition);
 
-        jsonSchemaValidator(validationTarget);
-        const output = {
-            source: validationTarget,
-            errors: jsonSchemaValidator.errors || [],
-        }
-        validationOutputEditor.setValue(JSON.stringify(output, undefined, 1));
-    };
+    //     jsonSchemaValidator(validationTarget);
+    //     const output = {
+    //         source: validationTarget,
+    //         errors: jsonSchemaValidator.errors || [],
+    //     }
+    //     validationOutputEditor.setValue(JSON.stringify(output, undefined, 1));
+    // };
 
-    await updateValidationEditor();
+    // await updateValidationEditor();
 
-    jsonSchemaEditor.getModel().onDidChangeContent(async () => {
-        await updateValidationEditor();
-    });
+    // jsonSchemaEditor.getModel().onDidChangeContent(async () => {
+    //     await updateValidationEditor();
+    // });
 
-    objectToValidateEditor.getModel().onDidChangeContent(async () => {
-        await updateValidationEditor();
-    });
+    // objectToValidateEditor.getModel().onDidChangeContent(async () => {
+    //     await updateValidationEditor();
+    // });
 });
 
 createEditors();
