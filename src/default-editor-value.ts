@@ -1,5 +1,11 @@
-// const Validator = require('./validate');
-import Validator from './validate';
+interface JsonSchema {
+    
+}
+
+if(!process.env) {
+    const thing: JsonSchema = {};
+    console.log(thing);
+}
 
 export interface SingleGame {
      /**
@@ -77,5 +83,3 @@ enum MeleeCharacterName {
     youngLink = 'Young Link',
     zelda = 'Zelda',
 }
-
-export const gameValidator = new Validator<SingleGame>();

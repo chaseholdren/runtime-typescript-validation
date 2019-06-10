@@ -6,6 +6,16 @@
     "build": "webpack --env prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "browserslist": {
+    "production": [
+      "> 1%",
+      "ie 10"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version"
+    ]
+  },
   "dependencies": {
     "@babel/plugin-proposal-private-methods": "^7.4.4",
     "@babel/traverse": "^7.4.5",

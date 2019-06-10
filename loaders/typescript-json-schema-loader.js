@@ -1,57 +1,38 @@
 const TJS = require('typescript-json-schema');
-const babelParser = require('@babel/parser');
-const t = require('@babel/types');
-const traverse = require("@babel/traverse").default;
 
-const generateJsonSchema = async (fileName) => {
+module.exports = loader;
+
+function loader(contents) {
+    return loadJsonSchemaFromTypescript(this, contents);
+};
+
+function loadJsonSchemaFromTypescript(loaderContext, contents) {
+
+
+    const fileName = loaderContext.resourcePath;
 
     const program = TJS.getProgramFromFiles([fileName]);
 
-    const args = {
+    const schemaObject = TJS.generateSchema(program, '*', {
         ...TJS.getDefaultArgs(),
-    };
-
-    const schema = TJS.generateSchema(program, '*', args);
-
-    return schema;
-};
-
-
-module.exports = function(sourceCode) {
-    var callback = this.async();
-
-    const ast = babelParser.parse(sourceCode, {
-        sourceType: 'module',
-        plugins: [
-           "typescript",
-           "dynamicImport",
-           "classProperties",
-           "classPrivateProperties",
-           "classPrivateMethods",
-        ]
     });
 
-    traverse(ast, {
-        NewExpression: function(path) {
-            console.log(JSON.stringify(path.node, undefined, 2));
-            if (path.node.callee.name === "Validator") {
-                const params = path.node.typeParameters.params;
+    const schemaString = JSON.stringify(schemaObject);
 
-                console.log(`${path.node.callee.name} for type ${params[0].typeName.name}`)
-            };
-        }
-    })
+    console.log(loaderContext);
+    console.log(schemaString);
+    console.log(contents);
 
-    generateJsonSchema(this.resourcePath)
-        .then((output) => {
-            const jsonSchema = JSON.stringify(output, undefined, 2);
+    contents = contents.replace(/\"\[SCHEMA_GOES_HERE\]\"/g, schemaString);
 
-            const result = `
-                export default ${jsonSchema};
-            `;
+    return `export default ${contents}`;
 
-            console.log(result);
+    // const result = `
+    // ${sourceCode}
 
-            callback(null, sourceCode);
-        });
+    // export const jsonSchema = ${schemaString};
+    // `
+
+    // callback(null, schemaString)
+    // return `"${encodeURI(schemaString)}"`;
 };
